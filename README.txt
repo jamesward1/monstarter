@@ -1,1 +1,1 @@
-Test
+Basic Phaser 3 starter with Nodemon and Webpack.

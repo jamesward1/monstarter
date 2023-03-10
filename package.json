@@ -6,6 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node server.js",
 		"dev": "npm-run-all --parallel dev:*",
 		"dev:webpack": "webpack -c webpack.config.cjs --watch",
 		"dev:nodemon": "nodemon --delay 500ms server.js"
