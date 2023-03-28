@@ -252,7 +252,23 @@ class Example extends Phaser.Scene {
 			}
 		})
 
-		this.loadCB(Data.data.scenes.Smalltown.info.cb);
+		//this.loadCB(Data.data.scenes.Smalltown.info.cb);
+		this.loadData(Data.data.scenes.Churchgrounds.info);
+	}
+
+	loadData(info) {
+		info.cb && this.loadCB(info.cb);
+		info.paths && this.loadGrid(info.paths, 'path');
+		info.roads && this.loadGrid(info.roads, 'road');
+	}
+
+	loadGrid(grid, context) {
+		grid.forEach((row, y) => {
+			row.forEach((cell, x) => {
+				cell && this.drawTile(x, y, context);
+			})
+		})
+
 	}
 
 	loadCB(cb) {
@@ -488,9 +504,7 @@ class Example extends Phaser.Scene {
 		}
 		if (!current) { return }
 		let finished = false;
-		let iters = 0;
-		while (!finished && iters < 200) {
-			iters++;
+		while (!finished) {
 			//console.log(current);
 			if (cb.length > 1 && arraysEqual(current, cb[0])) {
 				finished = true;
@@ -536,27 +550,51 @@ class Example extends Phaser.Scene {
 				finished = true;
 			}
 		}
-		return cb;
+		cb.forEach(cell => {
+			cell[0] += this.offset;
+			cell[1] += this.offset;
+		})
+		return cb.reverse();
 	}
 
 	writeToConsole() {
 
 		let cb = this.getBoundsArray();
-		cb && (this.cb = cb);
 		let exporter = "const graph = [\n";
 		cb && cb.forEach(node => {
-			exporter += "    [" + (node[0] + this.offset) + ", " + (node[1] + this.offset) + "]\n";
+			exporter += "    [" + node[0] + ", " + node[1] + "]\n";
 		})
 		exporter += "]";
 
 		$('#results textarea').val(exporter)
 	}
 
+	convert(g) {
+		let result = []
+		g.forEach((row, y) => {
+			let r = []
+			row.forEach((cell, x) => {
+				if (!cell || (cell && cell.texture.key == 'empty')) {
+					r.push(0);
+					return;
+				}
+				r.push(1);
+			})
+			result.push(r);
+		})
+		return result;
+	}
 
 
 	bake() {
+
+		let cb = this.getBoundsArray();
+		let paths = this.convert(this.path);
+		let roads = this.convert(this.road);
 		let result = {
-			cb: this.cb
+			cb: cb,
+			paths: paths,
+			roads: roads
 		}
 		//JSON.stringify(result);
 		this.socket.emit("result", result)

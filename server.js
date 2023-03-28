@@ -23,8 +23,17 @@ io.on('connection', (socket) => {
 	socket.on("result", (data) => {
 		console.log(JSON.stringify(data, null, 4));
 		fs.writeFile('bakefile.json', JSON.stringify(data, function (k, v) {
-			if (v instanceof Array && v.length < 4)
-				return JSON.stringify(v)
+			if (v instanceof Array) {
+				let numbers = true;
+				v.forEach(i => {
+					if (!(typeof i == 'number')) {
+						numbers = false;
+					}
+				})
+				if (numbers || v.length < 4) {
+					return JSON.stringify(v)
+				}
+			}
 			return v;
 		}, 4).replace(/\\/g, '')
 			.replace(/\"\[/g, '[')
